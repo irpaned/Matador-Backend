@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int     @id @default(autoincrement())
+  email           String  @unique
+  userName        String  @unique
+  fullName        String
+  password        String
+  photoProfile    String?
+  bio             String?
+  isVerified      Boolean @default(false)
+  isVerifiedEmail Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updateAt  DateTime @default(now()) @updatedAt
+
+  @@map("user")
+}
+
+model Verification {
+  id Int @id @default(autoincrement())
+
+  token String           @unique
+  type  VerificationType @default(EMAIL)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("verifications")
+}
+
+enum VerificationType {
+  FORGOT_PASSWORD
+  EMAIL
+}
