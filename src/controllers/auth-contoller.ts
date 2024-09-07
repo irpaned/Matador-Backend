@@ -37,9 +37,9 @@ async function register(req: Request, res: Response) {
       subject: "Verification Link", // Subject line
       html: `
       <div style="background-color: #FFF; margin: auto; width: 50%; text-align: center; padding: 1rem; border-radius: 12px; font-family: Arial, Helvetica, sans-serif; color: black;">
-          <H1 style="color: #04A51E; font-weight: bold;">PT Widya Matador Inovasi</H1>
+          <H1 style="color: #1B5184; font-weight: bold;">PT Widya Matador Inovasi</H1>
           <p style="font-size: 0.8rem;">Welcome!<br> Click the button below to verify your account</p>
-          <Button style="background-color: #04A51E; border: none; border-radius: 12px; height: 40px; margin: 1rem;"><a style="text-decoration: none; color: white; margin: 0.5rem; font-size: 1rem;" href="${fullUrl}/api/v1/auth/verify-email?token=${token}">Verify</a></Button>
+          <Button style="background-color: #1B5184; border: none; border-radius: 12px; height: 40px; margin: 1rem;"><a style="text-decoration: none; color: white; margin: 0.5rem; font-size: 1rem;" href="${fullUrl}/api/v1/auth/verify-email?token=${token}">Verify</a></Button>
           <p style="font-size: 0.8rem;">Please ignore this message if you feel that you are not registering to our services.</p>
           <p style="font-size: 0.8rem; margin-top: 0.33rem;"> Thank you for using our services.</p>
       </div>
@@ -116,9 +116,9 @@ async function resetPassword(req: Request, res: Response) {
       subject: "Verification Link",
       html: `
       <div style="background-color: #FFF; margin: auto; width: 50%; text-align: center; padding: 1rem; border-radius: 12px; font-family: Arial, Helvetica, sans-serif; color: black;">
-          <H1 style="color: #04A51E; font-weight: bold;">PT Widya Matador Inovasi</H1>
+          <H1 style="color: #1B5184; font-weight: bold;">PT Widya Matador Inovasi</H1>
           <p style="font-size: 0.8rem;">Welcome!<br> Click the button below to verify your email</p>
-          <Button style="background-color: #04A51E; border: none; border-radius: 12px; height: 40px; margin: 1rem;"><a style="text-decoration: none; color: white; margin: 0.5rem; font-size: 1rem;" href="${fullUrl}/api/v1/auth/verify-email-reset-password?token=${token}">Verify</a></Button>
+          <Button style="background-color: #1B5184; border: none; border-radius: 12px; height: 40px; margin: 1rem;"><a style="text-decoration: none; color: white; margin: 0.5rem; font-size: 1rem;" href="${fullUrl}/api/v1/auth/verify-email-reset-password?token=${token}">Verify</a></Button>
           <p style="font-size: 0.8rem;">Please ignore this message if you feel that you are not registering to our services.</p>
           <p style="font-size: 0.8rem; margin-top: 0.33rem;"> Thank you for using our services.</p>
       </div>

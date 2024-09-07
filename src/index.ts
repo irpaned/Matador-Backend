@@ -50,7 +50,7 @@ routerv1.patch(
 );
 
 //PRODUCT
-routerv1.get("/product", authenticate, ProductController.findMany);
+routerv1.get("/products", authenticate, ProductController.findMany);
 routerv1.delete("/product/:id", authenticate, ProductController.remove);
 routerv1.patch(
   "/product/:id",
