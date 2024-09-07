@@ -16,18 +16,35 @@ datasource db {
 model User {
   id              Int     @id @default(autoincrement())
   email           String  @unique
-  userName        String  @unique
+  sex             String
   fullName        String
   password        String
   photoProfile    String?
+  coverImage      String?
   bio             String?
   isVerified      Boolean @default(false)
   isVerifiedEmail Boolean @default(false)
+
+  product Product[]
 
   createdAt DateTime @default(now())
   updateAt  DateTime @default(now()) @updatedAt
 
   @@map("user")
+}
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  photoProduct String
+  productName  String
+  price        Int?     @default(0)
+  createdAt    DateTime @default(now())
+  updateAt     DateTime @default(now())
+
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
+
+  @@map("product")
 }
 
 model Verification {

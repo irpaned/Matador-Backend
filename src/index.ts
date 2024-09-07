@@ -2,9 +2,10 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import UserController from "./controllers/user-contoller";
 import AuthController from "./controllers/auth-contoller";
+import ProductController from "./controllers/product-controller";
 import dotenv from "dotenv";
-// import { upload } from "./middlewares/upload-file";
 import { authenticate } from "./middleware/authenticate";
+import { upload } from "./libs/upload-file";
 
 dotenv.config();
 
@@ -40,8 +41,28 @@ routerv1.get("/user", authenticate, UserController.find);
 routerv1.get("/users", authenticate, UserController.findMany);
 routerv1.patch(
   "/user/:id",
-  // upload.single("photoProfile"),
+  authenticate,
+  upload.fields([
+    { name: "photoProfile", maxCount: 1 },
+    { name: "coverImage", maxCount: 1 },
+  ]),
   UserController.updateProfile
+);
+
+//PRODUCT
+routerv1.get("/product", authenticate, ProductController.findMany);
+routerv1.delete("/product/:id", authenticate, ProductController.remove);
+routerv1.patch(
+  "/product/:id",
+  authenticate,
+  upload.fields([{ name: "photoProduct", maxCount: 1 }]),
+  ProductController.update
+);
+routerv1.post(
+  "/product",
+  authenticate,
+  upload.single("photoProduct"),
+  ProductController.create
 );
 
 app.listen(port, () => {

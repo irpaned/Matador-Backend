@@ -57,9 +57,15 @@ async function findMany(req: Request, res: Response) {
 async function updateProfile(req: Request, res: Response) {
   try {
     const { id } = req.params;
+
+    const files = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
     const body = {
       ...req.body,
-      //   photoProfile: req.file ? req.file.path : "",
+      photoProfile: files?.["photoProfile"]?.[0]?.path,
+      coverImage: files?.["coverImage"]?.[0]?.path,
     };
 
     const user = await UserService.findOneProfile(Number(id));

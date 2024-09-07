@@ -1,6 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { editProfileDTO } from "../dto/auth-dto";
+// import { editProfileDTO } from "../dto/auth-dto";
 import { v2 as cloudinary } from "cloudinary";
+import { updateProfileSchema } from "../validators/user";
+import { cloudinaryDelete, cloudinaryUpload } from "../utils/cloudinaryHandler";
+import { UserProfileDto } from "../dto/auth-dto";
 
 const prisma = new PrismaClient();
 
@@ -8,7 +11,7 @@ async function find(search: string, userId: number) {
   try {
     const data = await prisma.user.findMany({
       where: {
-        userName: {
+        email: {
           contains: search,
           mode: "insensitive",
         },
@@ -46,39 +49,48 @@ async function findOneProfile(id: number) {
   }
 }
 
-async function updateProfile(id: number, dto: editProfileDTO) {
+async function updateProfile(userId: number, dto: UserProfileDto) {
   try {
+    const userValidate = updateProfileSchema.validate(dto);
+    if (userValidate.error) throw new Error(userValidate.error.message);
+
     const user = await prisma.user.findFirst({
-      where: { id: Number(id) },
+      where: { id: userId },
     });
+
+    if (!user) throw new Error("User not found");
+
+    if (dto.photoProfile) {
+      if (user.photoProfile) {
+        await cloudinaryDelete(user.photoProfile);
+      }
+      const photoProfile = await cloudinaryUpload(dto.photoProfile);
+      dto.photoProfile = photoProfile?.secure_url;
+    }
+
+    if (dto.coverImage) {
+      if (user.coverImage) {
+        await cloudinaryDelete(user.coverImage);
+      }
+      const coverImage = await cloudinaryUpload(dto.coverImage);
+      dto.coverImage = coverImage?.secure_url;
+    }
 
     if (dto.fullName) {
       user!.fullName = dto.fullName;
     }
 
-    if (dto.userName) {
-      user!.userName = dto.userName;
+    if (dto.sex) {
+      user!.sex = dto.sex;
     }
 
     if (dto.bio) {
       user!.bio = dto.bio;
     }
 
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
-    });
-
-    if (dto.photoProfile) {
-      const upload = await cloudinary.uploader.upload(dto.photoProfile, {
-        upload_preset: "b54circle",
-      });
-      user!.photoProfile = dto.photoProfile = upload.secure_url;
-    }
     return await prisma.user.update({
-      where: { id: Number(id) },
-      data: { ...user },
+      where: { id: userId },
+      data: { ...dto },
     });
   } catch (error) {
     throw new String(error);

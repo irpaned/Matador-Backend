@@ -4,17 +4,18 @@ export type LoginDTO = {
 };
 
 export type registerDTO = {
-  userName: string;
+  sex: string;
   email: string;
   password: string;
   fullName: string;
 };
 
-export type editProfileDTO = {
-  userName: string;
-  fullName: string;
-  bio: string;
-  photoProfile: string;
+export type UserProfileDto = {
+  fullName?: string;
+  sex?: string;
+  bio?: string;
+  photoProfile?: string;
+  coverImage?: string;
 };
 
 export type ResetDTO = {
