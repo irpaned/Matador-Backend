@@ -16,35 +16,61 @@ datasource db {
 model User {
   id              Int     @id @default(autoincrement())
   email           String  @unique
-  sex             String
+  sex             String?
   fullName        String
-  password        String
+  password        String?
   photoProfile    String?
   coverImage      String?
   bio             String?
+  oauthId         String? @unique
+  accessToken     String?
   isVerified      Boolean @default(false)
   isVerifiedEmail Boolean @default(false)
 
-  product Product[]
+  product         ProductPackage[]
+  ProductPurchase ProductPurchase[]
 
-  createdAt DateTime @default(now())
-  updateAt  DateTime @default(now()) @updatedAt
+  createdAt         DateTime      @default(now())
+  updateAt          DateTime      @default(now()) @updatedAt
+  productPurchaseId Int?
+  Transaction       Transaction[]
 
   @@map("user")
 }
 
-model Product {
+model ProductPackage {
   id           Int      @id @default(autoincrement())
   photoProduct String
   productName  String
   price        Int?     @default(0)
   createdAt    DateTime @default(now())
-  updateAt     DateTime @default(now())
+  updatedAt    DateTime @default(now())
 
   User   User? @relation(fields: [userId], references: [id])
   userId Int?
 
   @@map("product")
+}
+
+model ProductPurchase {
+  id Int @id @default(autoincrement())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+}
+
+model Transaction {
+  id            Int      @id @default(autoincrement())
+  transactionId String
+  status        String
+  paymentType   String
+  amount        Int
+  user          User     @relation(fields: [userId], references: [id])
+  userId        Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
 }
 
 model Verification {

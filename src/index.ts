@@ -6,12 +6,105 @@ import ProductController from "./controllers/product-controller";
 import dotenv from "dotenv";
 import { authenticate } from "./middleware/authenticate";
 import { upload } from "./libs/upload-file";
+import {
+  createTransactionHandler,
+  midtransNotificationHandler,
+} from "./controllers/midtrans-controller";
+import { google } from "googleapis";
+import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
+
+const prisma = new PrismaClient();
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 const routerv1 = express.Router();
+// const oauth2Client = new google.auth.OAuth2(
+//   process.env.GOOGLE_CLIENT_ID,
+//   process.env.GOOGLE_CLIENT_SECRET,
+//   "http://localhost:5000/auth/google/callback"
+// );
+
+// const scope = [
+//   "https://www.googleapis.com/auth/userinfo.email",
+//   "https://www.googleapis.com/auth/userinfo.profile",
+// ];
+
+// const authorizationUrl = oauth2Client.generateAuthUrl({
+//   access_type: "offline",
+//   scope: scope,
+//   include_granted_scopes: true,
+// });
+
+// app.get("/auth/google", (req, res) => {
+//   res.redirect(authorizationUrl);
+// });
+
+// app.get("/auth/google/callback", async (req, res) => {
+//   const { code } = req.query;
+//   const { tokens } = await oauth2Client.getToken(code as string);
+//   oauth2Client.setCredentials(tokens);
+
+//   const oauth2 = google.oauth2({
+//     auth: oauth2Client,
+//     version: "v2",
+//   });
+
+//   const { data } = await oauth2.userinfo.get();
+
+//   if (!data.email || !data.name) {
+//     return res.json({
+//       data: data,
+//     });
+//   }
+
+//   let user = await prisma.user.findUnique({
+//     where: {
+//       email: data.email,
+//     },
+//   });
+
+//   if (!user) {
+//     user = await prisma.user.create({
+//       data: {
+//         email: data.email,
+//         fullName: data.name,
+//         isVerified: true,
+//       },
+//     });
+//   }
+
+//   const payload = {
+//     id: user?.id,
+//     fullName: user.fullName,
+//   };
+
+//   const secret = process.env.JWT_SECRET;
+
+//   if (typeof secret !== "string") {
+//     throw new Error(
+//       "JWT_SECRET environment variable is not set or is not a string."
+//     );
+//   }
+
+//   const expiresIn = 60 * 60 * 1 || "default_secret_key";
+
+//   const token = jwt.sign(payload, secret, {
+//     expiresIn: expiresIn,
+//   });
+
+//   const cekData = res.json({
+//     data: {
+//       id: user.id,
+//       fullName: user.fullName,
+//     },
+//     token: token,
+//   });
+
+//   return cekData;
+// });
 
 app.use(cors());
 app.use(express.json());
@@ -34,6 +127,9 @@ routerv1.get(
   "/auth/verify-email-reset-password",
   AuthController.verifyEmailForForgotPassword
 );
+//OAUTH
+routerv1.get("/auth/google", AuthController.googleView);
+routerv1.get("/auth/google/callback", AuthController.googleAuthCallback);
 
 // USER
 routerv1.get("/user/:id", UserController.findOneProfile);
@@ -64,6 +160,14 @@ routerv1.post(
   upload.single("photoProduct"),
   ProductController.create
 );
+
+// MIDTRANS
+routerv1.post(
+  "/create-transaction/:id",
+  authenticate,
+  createTransactionHandler
+);
+routerv1.post("/midtrans-notification", midtransNotificationHandler);
 
 app.listen(port, () => {
   console.log(`Server is running on PORT ${port}`);

@@ -6,7 +6,7 @@ import { productSchema } from "../validators/product";
 const prisma = new PrismaClient();
 
 async function findMany() {
-  return await prisma.product.findMany();
+  return await prisma.productPackage.findMany();
 }
 
 async function create(dto: ProductDTO, userId: number) {
@@ -19,7 +19,7 @@ async function create(dto: ProductDTO, userId: number) {
       dto.photoProduct = upload.secure_url;
     }
 
-    return await prisma.product.create({
+    return await prisma.productPackage.create({
       data: {
         ...dto,
         userId: userId,
@@ -35,12 +35,12 @@ async function create(dto: ProductDTO, userId: number) {
 
 async function remove(id: number) {
   try {
-    const product = await prisma.product.findFirst({
+    const product = await prisma.productPackage.findFirst({
       where: { id: Number(id) },
     });
 
     if (product) {
-      return await prisma.product.delete({
+      return await prisma.productPackage.delete({
         where: {
           id: Number(id),
         },
@@ -55,7 +55,7 @@ async function remove(id: number) {
 
 async function edit(id: number, dto: ProductDTO, userId: number) {
   try {
-    const product = await prisma.product.findFirst({
+    const product = await prisma.productPackage.findFirst({
       where: {
         id: Number(id),
       },
@@ -82,7 +82,7 @@ async function edit(id: number, dto: ProductDTO, userId: number) {
     }
 
     if (product?.userId === user?.id) {
-      return await prisma.product.update({
+      return await prisma.productPackage.update({
         where: {
           id: Number(id),
         },

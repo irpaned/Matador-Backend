@@ -1,8 +1,19 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { transporter } from "../libs/nodemailer";
-
+import { google } from "googleapis";
 import authService from "../services/auth-service";
+
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  "http://localhost:5000/api/v1/auth/google/callback"
+);
+
+const scope = [
+  "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/userinfo.profile",
+];
 
 async function login(req: Request, res: Response) {
   try {
@@ -32,9 +43,9 @@ async function register(req: Request, res: Response) {
     const fullUrl = req.protocol + "://" + req.get("host");
 
     const info = await transporter.sendMail({
-      from: '"PT Widya Matador Inovasi" <muhammadirfan2823@gmail.com>', // sender address
-      to: user.email, // list of receivers
-      subject: "Verification Link", // Subject line
+      from: '"PT Widya Matador Inovasi" <muhammadirfan2823@gmail.com>',
+      to: user.email,
+      subject: "Verification Link",
       html: `
       <div style="background-color: #FFF; margin: auto; width: 50%; text-align: center; padding: 1rem; border-radius: 12px; font-family: Arial, Helvetica, sans-serif; color: black;">
           <H1 style="color: #1B5184; font-weight: bold;">PT Widya Matador Inovasi</H1>
@@ -102,7 +113,7 @@ async function check(req: Request, res: Response) {
 async function resetPassword(req: Request, res: Response) {
   try {
     const body = req.body;
-    const getUser = await authService.user(req.body);
+    const getUser = await authService.user(body);
 
     const token = jwt.sign(
       getUser!.id.toString(),
@@ -179,6 +190,31 @@ async function verifyEmailForForgotPassword(req: Request, res: Response) {
   }
 }
 
+async function googleAuthCallback(req: Request, res: Response) {
+  try {
+    const { code } = req.query;
+    if (!code || typeof code !== "string") {
+      return res.status(400).json({ error: "Code is required" });
+    }
+
+    const { user, token } = await authService.handleGoogleCallback(code);
+    res.status(200).json({
+      data: {
+        id: user.id,
+        fullName: user.fullName,
+      },
+      token,
+    });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+}
+
+function googleView(req: Request, res: Response) {
+  const url = authService.generateGoogleAuthUrl();
+  res.redirect(url);
+}
+
 export default {
   login,
   register,
@@ -187,4 +223,6 @@ export default {
   resetPassword,
   ResetPassword,
   verifyEmailForForgotPassword,
+  googleView,
+  googleAuthCallback,
 };
