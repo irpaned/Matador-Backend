@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  "http://localhost:5000/api/v1/auth/google/callback"
+  process.env.GOOGLE_REDIRECT_URI
 );
 
 async function register(dto: registerDTO) {
@@ -234,84 +234,23 @@ async function handleGoogleCallback(code: string) {
     });
   }
 
-  const payload = { id: user.id, fullName: user.fullName };
+  const payload = {
+    id: user.id,
+    email: user.email,
+    fullName: user.fullName,
+    isVerified: user.isVerified,
+    sex: user.sex,
+    photoProfile: user.photoProfile,
+    coverImage: user.coverImage,
+    bio: user.bio,
+    isVerifiedEmail: user.isVerifiedEmail,
+  };
   const secret = process.env.JWT_SECRET as string;
 
   const token = jwt.sign(payload, secret, { expiresIn: "1h" });
 
   return { user, token };
 }
-
-// async function authenticateGoogleUser(code: string) {
-//   const { tokens } = await oauth2Client.getToken(code);
-//   oauth2Client.setCredentials(tokens);
-
-//   const oauth2 = google.oauth2({
-//     auth: oauth2Client,
-//     version: "v2",
-//   });
-
-//   const { data } = await oauth2.userinfo.get();
-
-//   if (!data.email || !data.name) {
-//     throw new Error("User data is incomplete.");
-//   }
-
-//   let user = await prisma.user.findUnique({
-//     where: {
-//       email: data.email,
-//     },
-//   });
-
-//   if (!user) {
-//     user = await prisma.user.create({
-//       data: {
-//         email: data.email,
-//         fullName: data.name,
-//         isVerified: true,
-//       },
-//     });
-//   }
-
-//   const payload = {
-//     id: user.id,
-//     fullName: user.fullName,
-//   };
-
-//   const secret = process.env.JWT_SECRET;
-
-//   if (typeof secret !== "string") {
-//     throw new Error(
-//       "JWT_SECRET environment variable is not set or is not a string."
-//     );
-//   }
-
-//   const expiresIn = 60 * 60 * 1;
-
-//   const token = jwt.sign(payload, secret, {
-//     expiresIn: expiresIn,
-//   });
-
-//   const cek = {
-//     user: {
-//       id: user.id,
-//       fullName: user.fullName,
-//     },
-//     token,
-//   };
-
-//   console.log("cek", cek);
-
-//   return cek;
-
-//   // return {
-//   //   user: {
-//   //     id: user.id,
-//   //     fullName: user.fullName,
-//   //   },
-//   //   token,
-//   // };
-// }
 
 export default {
   login,
@@ -321,7 +260,6 @@ export default {
   reset,
   verifyEmailForForgotPassword,
   user,
-  // authenticateGoogleUser,
   handleGoogleCallback,
   generateGoogleAuthUrl,
 };

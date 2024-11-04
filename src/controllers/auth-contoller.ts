@@ -190,6 +190,11 @@ async function verifyEmailForForgotPassword(req: Request, res: Response) {
   }
 }
 
+function googleView(req: Request, res: Response) {
+  const url = authService.generateGoogleAuthUrl();
+  res.json({ url });
+}
+
 async function googleAuthCallback(req: Request, res: Response) {
   try {
     const { code } = req.query;
@@ -198,21 +203,19 @@ async function googleAuthCallback(req: Request, res: Response) {
     }
 
     const { user, token } = await authService.handleGoogleCallback(code);
-    res.status(200).json({
-      data: {
-        id: user.id,
-        fullName: user.fullName,
-      },
-      token,
-    });
-  } catch (error) {
-    res.status(500).json(error);
-  }
-}
+    console.log("ini token :", token);
+    res.redirect(`http://localhost:5173/auth/google/callback?token=${token}`);
 
-function googleView(req: Request, res: Response) {
-  const url = authService.generateGoogleAuthUrl();
-  res.redirect(url);
+    // res.status(200).json({
+    //   data: {
+    //     id: user.id,
+    //     fullName: user.fullName,
+    //   },
+    //   token,
+    // });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to authenticate with Google." });
+  }
 }
 
 export default {
